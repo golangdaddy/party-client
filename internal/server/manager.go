@@ -511,10 +511,21 @@ func (m *Manager) startServer(serverConfig *config.MinecraftServerConfig) {
 		return
 	}
 
-	// Kill any existing processes using this port
+	// Kill all existing Bedrock servers to prevent conflicts
+	m.killAllBedrockServers()
+
+	// Kill any existing processes using this port (more thorough cleanup)
 	if err := m.killProcessesOnPort(serverConfig.Port); err != nil {
 		m.logger.Warnf("Failed to kill processes on port %d: %v", serverConfig.Port, err)
 	}
+
+	// Also kill processes on the default IPv6 port to prevent conflicts
+	if err := m.killProcessesOnPort(19133); err != nil {
+		m.logger.Warnf("Failed to kill processes on IPv6 port 19133: %v", err)
+	}
+
+	// Wait a bit to ensure ports are fully released
+	time.Sleep(3 * time.Second)
 
 	// Check if Bedrock server executable exists
 	if err := m.checkBedrockServer(serverConfig.Version); err != nil {
@@ -526,6 +537,13 @@ func (m *Manager) startServer(serverConfig *config.MinecraftServerConfig) {
 	propertiesPath := m.config.GetServerPropertiesPath(serverConfig.Name)
 	if err := m.createServerProperties(serverConfig, propertiesPath); err != nil {
 		m.logger.Errorf("Failed to create server.properties for %s: %v", serverConfig.Name, err)
+		return
+	}
+
+	// Copy server.properties to bedrock-server-extracted directory to override defaults
+	bedrockPropertiesPath := filepath.Join(filepath.Dir(m.bedrockPath), "server.properties")
+	if err := m.copyServerProperties(propertiesPath, bedrockPropertiesPath); err != nil {
+		m.logger.Errorf("Failed to copy server.properties to bedrock directory for %s: %v", serverConfig.Name, err)
 		return
 	}
 
@@ -546,7 +564,7 @@ func (m *Manager) startServer(serverConfig *config.MinecraftServerConfig) {
 	// Start the server process in the bedrock-server-extracted directory
 	bedrockDir := filepath.Dir(m.bedrockPath)
 	cmd := exec.Command(m.bedrockPath,
-		"-port", strconv.Itoa(serverConfig.Port),
+		"-port", strconv.Itoa(20000+serverConfig.Port-19132), // Use port range 20000+ to avoid conflicts
 		"-worldsdir", serverDir,
 		"-world", serverConfig.WorldName,
 		"-logpath", filepath.Join(serverDir, "logs"))
@@ -575,6 +593,9 @@ func (m *Manager) startServer(serverConfig *config.MinecraftServerConfig) {
 	go m.monitorServer(serverConfig.Name, cmd)
 
 	m.logger.Infof("Server %s started on port %d", serverConfig.Name, serverConfig.Port)
+
+	// Add a longer delay between server starts to prevent port conflicts
+	time.Sleep(5 * time.Second)
 }
 
 func (m *Manager) stopServer(name string) {
@@ -628,7 +649,7 @@ func (m *Manager) checkBedrockServer(version string) error {
 
 func (m *Manager) createServerProperties(serverConfig *config.MinecraftServerConfig, propertiesPath string) error {
 	properties := map[string]string{
-		"server-port":                              strconv.Itoa(serverConfig.Port),
+		"server-port":                              strconv.Itoa(20000 + serverConfig.Port - 19132), // Use port range 20000+ to avoid conflicts
 		"gamemode":                                 serverConfig.Gamemode,
 		"difficulty":                               serverConfig.Difficulty,
 		"max-players":                              strconv.Itoa(serverConfig.MaxPlayers),
@@ -650,11 +671,14 @@ func (m *Manager) createServerProperties(serverConfig *config.MinecraftServerCon
 		"player-movement-distance-threshold":       "0.3",
 		"player-movement-duration-threshold-in-ms": "500",
 		"correct-player-movement":                  "true",
-		// Try different IPv6 configurations
+		// IPv6 configuration - completely disable IPv6 to avoid conflicts
 		"enable-ipv6": "false",
-		"ipv6-port":   "0", // Set to 0 to disable IPv6
-		// Alternative: use a different port range for IPv6
-		// "ipv6-port": strconv.Itoa(serverConfig.Port + 1000),
+		"ipv6-port":   "0",
+		// Additional network settings to prevent conflicts
+		"server-ip":    "",
+		"server-port6": "0",
+		// Disable LAN visibility to prevent binding to default ports
+		"enable-lan-visibility": "false",
 	}
 
 	// Add custom properties
@@ -751,7 +775,7 @@ func (m *Manager) GetStatus() ManagerStatus {
 }
 
 func (m *Manager) killProcessesOnPort(port int) error {
-	// Use lsof to find processes using the port
+	// Use lsof to find processes using the port (both IPv4 and IPv6)
 	cmd := exec.Command("lsof", "-ti", fmt.Sprintf(":%d", port))
 	output, err := cmd.Output()
 	if err != nil {
@@ -811,6 +835,15 @@ func (m *Manager) killProcessesOnPort(port int) error {
 	// Wait a bit more for processes to fully terminate
 	time.Sleep(1 * time.Second)
 
+	// Double-check that the port is now free
+	time.Sleep(500 * time.Millisecond)
+	cmd = exec.Command("lsof", "-ti", fmt.Sprintf(":%d", port))
+	if err := cmd.Run(); err == nil {
+		// Port is still in use, try one more time with more aggressive cleanup
+		m.logger.Warnf("Port %d still in use after cleanup, trying aggressive cleanup...", port)
+		time.Sleep(2 * time.Second)
+	}
+
 	return nil
 }
 
@@ -821,6 +854,8 @@ func (m *Manager) cleanupPortsOnStartup() {
 	ports := []int{
 		19132, 19133, 19134, 19135, 19136, // IPv4 ports
 		20132, 20133, 20134, 20135, 20136, // Potential IPv6 ports
+		19137, 19138, 19139, 19140, 19141, // Additional ports
+		20137, 20138, 20139, 20140, 20141, // Additional IPv6 ports
 	}
 
 	for _, port := range ports {
@@ -828,4 +863,36 @@ func (m *Manager) cleanupPortsOnStartup() {
 			m.logger.Warnf("Failed to cleanup port %d: %v", port, err)
 		}
 	}
+
+	// Wait a bit to ensure all ports are fully released
+	time.Sleep(2 * time.Second)
+}
+
+func (m *Manager) copyServerProperties(sourcePath, destPath string) error {
+	// Read the source file
+	sourceContent, err := os.ReadFile(sourcePath)
+	if err != nil {
+		return fmt.Errorf("failed to read source file: %w", err)
+	}
+
+	// Write the destination file
+	if err := os.WriteFile(destPath, sourceContent, 0644); err != nil {
+		return fmt.Errorf("failed to write destination file: %w", err)
+	}
+
+	return nil
+}
+
+func (m *Manager) killAllBedrockServers() {
+	m.logger.Info("Killing all existing Bedrock server processes...")
+
+	// Kill all bedrock_server processes
+	cmd := exec.Command("pkill", "-f", "bedrock_server")
+	if err := cmd.Run(); err != nil {
+		// It's okay if no processes were found
+		m.logger.Debug("No existing Bedrock server processes found")
+	}
+
+	// Wait a bit for processes to fully terminate
+	time.Sleep(2 * time.Second)
 }
