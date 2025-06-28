@@ -1,0 +1,19 @@
+Dedicated_Server.txt
+[2025-06-28 01:33:50:289 INFO] Starting Server
+[2025-06-28 01:33:50:289 INFO] Version: 1.21.92.1
+[2025-06-28 01:33:50:289 INFO] Session ID: 17ece807-c02f-41c7-a353-8f2b06d0dfa0
+[2025-06-28 01:33:50:289 INFO] Build ID: 34417687
+[2025-06-28 01:33:50:289 INFO] Branch: r/21_u9
+[2025-06-28 01:33:50:289 INFO] Commit ID: 7473620acd458b6dc1885615e752aad5c2877b76
+[2025-06-28 01:33:50:289 INFO] Configuration: Publish
+[2025-06-28 01:33:50:289 INFO] Level Name: creative
+[2025-06-28 01:33:50:291 ERROR] Error opening allow list file: allowlist.json
+[2025-06-28 01:33:50:291 ERROR] xuid or permission missing from permissions file: permissions.json
+[2025-06-28 01:33:50:291 ERROR] xuid or permission missing from permissions file: permissions.json
+[2025-06-28 01:33:50:291 INFO] No CDN config file found for dedicated server
+[2025-06-28 01:33:50:291 INFO] Game mode: 1 Creative
+[2025-06-28 01:33:50:291 INFO] Difficulty: 0 PEACEFUL
+[2025-06-28 01:33:50:292 INFO] Content logging to console is enabled.
+[2025-06-28 01:33:50:293 INFO] AuthHelper loading cert AppCertificate.pfx
+[2025-06-28 01:33:50:293 WARN] AuthHelper could not find cert
+[2025-06-28 01:33:50:295 ERROR] Failed to load Vanilla Resource Pack, is the vanilla pack missing from the loaded world?

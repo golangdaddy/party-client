@@ -117,7 +117,16 @@ func (m *Manager) initializeBedrockServer() error {
 	if _, err := os.Stat(bedrockArchive); err != nil {
 		if os.IsNotExist(err) {
 			m.logger.Info("No Bedrock server archive found in versions/bedrock-server.zip, using configured path")
-			m.bedrockPath = m.config.Server.BedrockPath
+			// Convert relative path to absolute path
+			if !filepath.IsAbs(m.config.Server.BedrockPath) {
+				absPath, err := filepath.Abs(m.config.Server.BedrockPath)
+				if err != nil {
+					return fmt.Errorf("failed to get absolute path for %s: %w", m.config.Server.BedrockPath, err)
+				}
+				m.bedrockPath = absPath
+			} else {
+				m.bedrockPath = m.config.Server.BedrockPath
+			}
 			return nil
 		}
 		return fmt.Errorf("failed to check Bedrock server archive: %w", err)
@@ -145,8 +154,12 @@ func (m *Manager) initializeBedrockServer() error {
 		return fmt.Errorf("failed to extract archive: %w", err)
 	}
 
-	// Set the Bedrock path to the extracted executable
-	m.bedrockPath = "./bedrock-server-extracted/bedrock_server"
+	// Set the Bedrock path to the extracted executable (absolute path)
+	absPath, err := filepath.Abs("./bedrock-server-extracted/bedrock_server")
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path for bedrock server: %w", err)
+	}
+	m.bedrockPath = absPath
 	m.logger.Infof("Bedrock server initialized at: %s", m.bedrockPath)
 
 	return nil
