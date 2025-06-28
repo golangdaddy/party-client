@@ -1,19 +1,19 @@
 Dedicated_Server.txt
-[2025-06-28 01:33:50:297 INFO] Starting Server
-[2025-06-28 01:33:50:297 INFO] Version: 1.21.92.1
-[2025-06-28 01:33:50:297 INFO] Session ID: 2b2f37f5-77f4-49cc-8e19-7e5337765688
-[2025-06-28 01:33:50:297 INFO] Build ID: 34417687
-[2025-06-28 01:33:50:297 INFO] Branch: r/21_u9
-[2025-06-28 01:33:50:297 INFO] Commit ID: 7473620acd458b6dc1885615e752aad5c2877b76
-[2025-06-28 01:33:50:297 INFO] Configuration: Publish
-[2025-06-28 01:33:50:298 INFO] Level Name: minigames
-[2025-06-28 01:33:50:299 ERROR] Error opening allow list file: allowlist.json
-[2025-06-28 01:33:50:299 ERROR] xuid or permission missing from permissions file: permissions.json
-[2025-06-28 01:33:50:299 ERROR] xuid or permission missing from permissions file: permissions.json
-[2025-06-28 01:33:50:299 INFO] No CDN config file found for dedicated server
-[2025-06-28 01:33:50:299 INFO] Game mode: 2 Adventure
-[2025-06-28 01:33:50:299 INFO] Difficulty: 2 NORMAL
-[2025-06-28 01:33:50:301 INFO] Content logging to console is enabled.
-[2025-06-28 01:33:50:301 INFO] AuthHelper loading cert AppCertificate.pfx
-[2025-06-28 01:33:50:301 WARN] AuthHelper could not find cert
-[2025-06-28 01:33:50:307 ERROR] Failed to load Vanilla Resource Pack, is the vanilla pack missing from the loaded world?
+[2025-06-28 01:34:59:183 INFO] Starting Server
+[2025-06-28 01:34:59:183 INFO] Version: 1.21.92.1
+[2025-06-28 01:34:59:183 INFO] Session ID: 3bb3d7f7-1ecb-4e2e-a51c-b23313804527
+[2025-06-28 01:34:59:183 INFO] Build ID: 34417687
+[2025-06-28 01:34:59:183 INFO] Branch: r/21_u9
+[2025-06-28 01:34:59:183 INFO] Commit ID: 7473620acd458b6dc1885615e752aad5c2877b76
+[2025-06-28 01:34:59:184 INFO] Configuration: Publish
+[2025-06-28 01:34:59:184 INFO] Level Name: minigames
+[2025-06-28 01:34:59:185 ERROR] Error opening allow list file: allowlist.json
+[2025-06-28 01:34:59:185 ERROR] xuid or permission missing from permissions file: permissions.json
+[2025-06-28 01:34:59:185 ERROR] xuid or permission missing from permissions file: permissions.json
+[2025-06-28 01:34:59:185 INFO] No CDN config file found for dedicated server
+[2025-06-28 01:34:59:185 INFO] Game mode: 2 Adventure
+[2025-06-28 01:34:59:185 INFO] Difficulty: 2 NORMAL
+[2025-06-28 01:34:59:186 INFO] Content logging to console is enabled.
+[2025-06-28 01:34:59:186 INFO] AuthHelper loading cert AppCertificate.pfx
+[2025-06-28 01:34:59:187 WARN] AuthHelper could not find cert
+[2025-06-28 01:34:59:188 ERROR] Failed to load Vanilla Resource Pack, is the vanilla pack missing from the loaded world?

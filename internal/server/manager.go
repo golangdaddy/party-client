@@ -535,14 +535,15 @@ func (m *Manager) startServer(serverConfig *config.MinecraftServerConfig) {
 		return
 	}
 
-	// Start the server process
+	// Start the server process in the bedrock-server-extracted directory
+	bedrockDir := filepath.Dir(m.bedrockPath)
 	cmd := exec.Command(m.bedrockPath,
 		"-port", strconv.Itoa(serverConfig.Port),
 		"-worldsdir", serverDir,
 		"-world", serverConfig.WorldName,
 		"-logpath", filepath.Join(serverDir, "logs"))
 
-	cmd.Dir = serverDir
+	cmd.Dir = bedrockDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

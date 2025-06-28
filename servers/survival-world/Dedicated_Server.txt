@@ -1,20 +1,20 @@
 Dedicated_Server.txt
-[2025-06-28 01:33:50:292 INFO] Starting Server
-[2025-06-28 01:33:50:292 INFO] Version: 1.21.92.1
-[2025-06-28 01:33:50:292 INFO] Session ID: beaf95f6-fbdd-4a6a-8656-a7dbefca937a
-[2025-06-28 01:33:50:292 INFO] Build ID: 34417687
-[2025-06-28 01:33:50:292 INFO] Branch: r/21_u9
-[2025-06-28 01:33:50:292 INFO] Commit ID: 7473620acd458b6dc1885615e752aad5c2877b76
-[2025-06-28 01:33:50:292 INFO] Configuration: Publish
-[2025-06-28 01:33:50:292 INFO] Level Name: survival
-[2025-06-28 01:33:50:294 ERROR] Error opening allow list file: allowlist.json
-[2025-06-28 01:33:50:294 ERROR] xuid or permission missing from permissions file: permissions.json
-[2025-06-28 01:33:50:294 ERROR] xuid or permission missing from permissions file: permissions.json
-[2025-06-28 01:33:50:294 ERROR] xuid or permission missing from permissions file: permissions.json
-[2025-06-28 01:33:50:294 INFO] No CDN config file found for dedicated server
-[2025-06-28 01:33:50:294 INFO] Game mode: 0 Survival
-[2025-06-28 01:33:50:294 INFO] Difficulty: 2 NORMAL
-[2025-06-28 01:33:50:295 INFO] Content logging to console is enabled.
-[2025-06-28 01:33:50:296 INFO] AuthHelper loading cert AppCertificate.pfx
-[2025-06-28 01:33:50:296 WARN] AuthHelper could not find cert
-[2025-06-28 01:33:50:300 ERROR] Failed to load Vanilla Resource Pack, is the vanilla pack missing from the loaded world?
+[2025-06-28 01:34:59:177 INFO] Starting Server
+[2025-06-28 01:34:59:177 INFO] Version: 1.21.92.1
+[2025-06-28 01:34:59:177 INFO] Session ID: 988d80e9-b389-4454-8783-3de47b64fe8c
+[2025-06-28 01:34:59:177 INFO] Build ID: 34417687
+[2025-06-28 01:34:59:177 INFO] Branch: r/21_u9
+[2025-06-28 01:34:59:177 INFO] Commit ID: 7473620acd458b6dc1885615e752aad5c2877b76
+[2025-06-28 01:34:59:177 INFO] Configuration: Publish
+[2025-06-28 01:34:59:177 INFO] Level Name: survival
+[2025-06-28 01:34:59:179 ERROR] Error opening allow list file: allowlist.json
+[2025-06-28 01:34:59:179 ERROR] xuid or permission missing from permissions file: permissions.json
+[2025-06-28 01:34:59:179 ERROR] xuid or permission missing from permissions file: permissions.json
+[2025-06-28 01:34:59:179 ERROR] xuid or permission missing from permissions file: permissions.json
+[2025-06-28 01:34:59:179 INFO] No CDN config file found for dedicated server
+[2025-06-28 01:34:59:179 INFO] Game mode: 0 Survival
+[2025-06-28 01:34:59:179 INFO] Difficulty: 2 NORMAL
+[2025-06-28 01:34:59:180 INFO] Content logging to console is enabled.
+[2025-06-28 01:34:59:181 INFO] AuthHelper loading cert AppCertificate.pfx
+[2025-06-28 01:34:59:181 WARN] AuthHelper could not find cert
+[2025-06-28 01:34:59:182 ERROR] Failed to load Vanilla Resource Pack, is the vanilla pack missing from the loaded world?

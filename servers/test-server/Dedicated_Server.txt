@@ -1,17 +1,17 @@
 Dedicated_Server.txt
-[2025-06-28 01:33:50:291 INFO] Starting Server
-[2025-06-28 01:33:50:291 INFO] Version: 1.21.92.1
-[2025-06-28 01:33:50:291 INFO] Session ID: 64727815-7389-4a57-913d-ce465626ac69
-[2025-06-28 01:33:50:291 INFO] Build ID: 34417687
-[2025-06-28 01:33:50:291 INFO] Branch: r/21_u9
-[2025-06-28 01:33:50:291 INFO] Commit ID: 7473620acd458b6dc1885615e752aad5c2877b76
-[2025-06-28 01:33:50:291 INFO] Configuration: Publish
-[2025-06-28 01:33:50:291 INFO] Level Name: test
-[2025-06-28 01:33:50:294 ERROR] Error opening allow list file: allowlist.json
-[2025-06-28 01:33:50:294 INFO] No CDN config file found for dedicated server
-[2025-06-28 01:33:50:294 INFO] Game mode: 0 Survival
-[2025-06-28 01:33:50:294 INFO] Difficulty: 1 EASY
-[2025-06-28 01:33:50:296 INFO] Content logging to console is enabled.
-[2025-06-28 01:33:50:296 INFO] AuthHelper loading cert AppCertificate.pfx
-[2025-06-28 01:33:50:296 WARN] AuthHelper could not find cert
-[2025-06-28 01:33:50:300 ERROR] Failed to load Vanilla Resource Pack, is the vanilla pack missing from the loaded world?
+[2025-06-28 01:34:59:187 INFO] Starting Server
+[2025-06-28 01:34:59:187 INFO] Version: 1.21.92.1
+[2025-06-28 01:34:59:187 INFO] Session ID: ce985c29-b901-4122-8113-241c0e254802
+[2025-06-28 01:34:59:187 INFO] Build ID: 34417687
+[2025-06-28 01:34:59:187 INFO] Branch: r/21_u9
+[2025-06-28 01:34:59:187 INFO] Commit ID: 7473620acd458b6dc1885615e752aad5c2877b76
+[2025-06-28 01:34:59:188 INFO] Configuration: Publish
+[2025-06-28 01:34:59:188 INFO] Level Name: test
+[2025-06-28 01:34:59:190 ERROR] Error opening allow list file: allowlist.json
+[2025-06-28 01:34:59:190 INFO] No CDN config file found for dedicated server
+[2025-06-28 01:34:59:190 INFO] Game mode: 0 Survival
+[2025-06-28 01:34:59:190 INFO] Difficulty: 1 EASY
+[2025-06-28 01:34:59:192 INFO] Content logging to console is enabled.
+[2025-06-28 01:34:59:192 INFO] AuthHelper loading cert AppCertificate.pfx
+[2025-06-28 01:34:59:192 WARN] AuthHelper could not find cert
+[2025-06-28 01:34:59:196 ERROR] Failed to load Vanilla Resource Pack, is the vanilla pack missing from the loaded world?
