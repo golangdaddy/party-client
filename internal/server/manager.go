@@ -511,15 +511,17 @@ func (m *Manager) startServer(serverConfig *config.MinecraftServerConfig) {
 		return
 	}
 
-	// Kill all existing Bedrock servers to prevent conflicts
-	m.killAllBedrockServers()
+	// Only kill processes using the specific ports this server needs
+	// This is more selective than killing all Bedrock servers
+	actualPort := 20000 + serverConfig.Port - 19132 // The actual port the server will use
 
-	// Kill any existing processes using this port (more thorough cleanup)
-	if err := m.killProcessesOnPort(serverConfig.Port); err != nil {
-		m.logger.Warnf("Failed to kill processes on port %d: %v", serverConfig.Port, err)
+	// Kill any existing processes using this specific port
+	if err := m.killProcessesOnPort(actualPort); err != nil {
+		m.logger.Warnf("Failed to kill processes on port %d: %v", actualPort, err)
 	}
 
 	// Also kill processes on the default IPv6 port to prevent conflicts
+	// But only if this server would conflict with it
 	if err := m.killProcessesOnPort(19133); err != nil {
 		m.logger.Warnf("Failed to kill processes on IPv6 port 19133: %v", err)
 	}
