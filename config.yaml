@@ -1,6 +1,6 @@
 github:
   repo_owner: "golangdaddy"
-  repo_name: "party"
+  repo_name: "party2"
   branch: "main"
   config_path: "servers.yaml"
   poll_interval: 300  # seconds
