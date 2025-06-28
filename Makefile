@@ -1,4 +1,4 @@
-# Minecraft Bedrock Server Manager Makefile
+# Minecraft Bedrock Server Manager Makefile 2025
 
 # Variables
 BINARY_NAME = minecraft-manager
