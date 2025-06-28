@@ -1,0 +1,17 @@
+[
+  {
+    "name": "admin1",
+    "xuid": "",
+    "permission": "operator"
+  },
+  {
+    "name": "player1",
+    "xuid": "",
+    "permission": "member"
+  },
+  {
+    "name": "player2",
+    "xuid": "",
+    "permission": "member"
+  }
+]

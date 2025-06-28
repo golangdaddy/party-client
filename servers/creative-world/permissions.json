@@ -1,0 +1,12 @@
+[
+  {
+    "name": "admin1",
+    "xuid": "",
+    "permission": "operator"
+  },
+  {
+    "name": "admin2",
+    "xuid": "",
+    "permission": "operator"
+  }
+]
