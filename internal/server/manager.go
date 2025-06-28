@@ -81,6 +81,9 @@ func NewManager(cfg *config.Config, logger *logrus.Logger) *Manager {
 func (m *Manager) Start(ctx context.Context, githubClient *github.Client) {
 	m.logger.Info("Starting Minecraft Bedrock server manager")
 
+	// Clean up any existing processes on server ports
+	m.cleanupPortsOnStartup()
+
 	// Initialize Bedrock server
 	if err := m.initializeBedrockServer(); err != nil {
 		m.logger.Errorf("Failed to initialize Bedrock server: %v", err)
@@ -508,6 +511,11 @@ func (m *Manager) startServer(serverConfig *config.MinecraftServerConfig) {
 		return
 	}
 
+	// Kill any existing processes using this port
+	if err := m.killProcessesOnPort(serverConfig.Port); err != nil {
+		m.logger.Warnf("Failed to kill processes on port %d: %v", serverConfig.Port, err)
+	}
+
 	// Check if Bedrock server executable exists
 	if err := m.checkBedrockServer(serverConfig.Version); err != nil {
 		m.logger.Errorf("Failed to check Bedrock server for %s: %v", serverConfig.Name, err)
@@ -642,6 +650,11 @@ func (m *Manager) createServerProperties(serverConfig *config.MinecraftServerCon
 		"player-movement-distance-threshold":       "0.3",
 		"player-movement-duration-threshold-in-ms": "500",
 		"correct-player-movement":                  "true",
+		// Try different IPv6 configurations
+		"enable-ipv6": "false",
+		"ipv6-port":   "0", // Set to 0 to disable IPv6
+		// Alternative: use a different port range for IPv6
+		// "ipv6-port": strconv.Itoa(serverConfig.Port + 1000),
 	}
 
 	// Add custom properties
@@ -735,4 +748,84 @@ func (m *Manager) GetStatus() ManagerStatus {
 	}
 
 	return status
+}
+
+func (m *Manager) killProcessesOnPort(port int) error {
+	// Use lsof to find processes using the port
+	cmd := exec.Command("lsof", "-ti", fmt.Sprintf(":%d", port))
+	output, err := cmd.Output()
+	if err != nil {
+		// If no processes found, that's fine
+		if strings.Contains(err.Error(), "exit status 1") {
+			return nil
+		}
+		return fmt.Errorf("failed to check processes on port %d: %w", port, err)
+	}
+
+	// Parse PIDs from output
+	pids := strings.Fields(strings.TrimSpace(string(output)))
+	if len(pids) == 0 {
+		return nil
+	}
+
+	m.logger.Infof("Found %d process(es) using port %d, terminating...", len(pids), port)
+
+	// Kill each process
+	for _, pidStr := range pids {
+		pid, err := strconv.Atoi(pidStr)
+		if err != nil {
+			m.logger.Warnf("Invalid PID %s: %v", pidStr, err)
+			continue
+		}
+
+		// Try graceful termination first
+		process, err := os.FindProcess(pid)
+		if err != nil {
+			m.logger.Warnf("Could not find process %d: %v", pid, err)
+			continue
+		}
+
+		// Send SIGTERM first
+		err = process.Signal(os.Interrupt)
+		if err != nil {
+			m.logger.Warnf("Could not send SIGTERM to process %d: %v", pid, err)
+		}
+
+		// Wait a bit for graceful shutdown
+		time.Sleep(2 * time.Second)
+
+		// Check if process is still running
+		if process.Signal(os.Signal(nil)) == nil {
+			// Process still running, force kill
+			err = process.Kill()
+			if err != nil {
+				m.logger.Warnf("Could not kill process %d: %v", pid, err)
+			} else {
+				m.logger.Infof("Force killed process %d on port %d", pid, port)
+			}
+		} else {
+			m.logger.Infof("Gracefully terminated process %d on port %d", pid, port)
+		}
+	}
+
+	// Wait a bit more for processes to fully terminate
+	time.Sleep(1 * time.Second)
+
+	return nil
+}
+
+func (m *Manager) cleanupPortsOnStartup() {
+	m.logger.Info("Cleaning up any existing processes on server ports...")
+
+	// Common Bedrock server ports (IPv4 and IPv6)
+	ports := []int{
+		19132, 19133, 19134, 19135, 19136, // IPv4 ports
+		20132, 20133, 20134, 20135, 20136, // Potential IPv6 ports
+	}
+
+	for _, port := range ports {
+		if err := m.killProcessesOnPort(port); err != nil {
+			m.logger.Warnf("Failed to cleanup port %d: %v", port, err)
+		}
+	}
 }
