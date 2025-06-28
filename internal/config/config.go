@@ -32,6 +32,7 @@ type ServerConfig struct {
 	MaxInstances int    `yaml:"max_instances"`
 	BedrockPath  string `yaml:"bedrock_path"`
 	MemoryLimit  string `yaml:"memory_limit"`
+	FirstRun     bool   `yaml:"first_run"`
 }
 
 type MinecraftServerConfig struct {

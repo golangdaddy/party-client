@@ -26,6 +26,11 @@ help: ## Show this help message
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""
+	@echo "First Run Mode:"
+	@echo "  \033[36mrun-first\033[0m         Build and run in first-run mode"
+	@echo "  \033[36mrun-only-first\033[0m    Run without building in first-run mode"
+	@echo "  \033[36mdev-first\033[0m         Run with Go directly in first-run mode"
+	@echo ""
 	@echo "Branch Management:"
 	@echo "  \033[36mbranch-main\033[0m        Switch to main branch"
 	@echo "  \033[36mbranch-dev\033[0m         Switch to dev branch"
@@ -61,6 +66,14 @@ run: build ## Build and run the application
 	@echo "Press Ctrl+C to stop"
 	@$(BUILD_DIR)/$(BINARY_NAME)
 
+# Run in first-run mode
+run-first: build ## Build and run the application in first-run mode
+	@echo "Starting $(BINARY_NAME) in first-run mode..."
+	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
+	@echo "First-run mode enabled - will handle missing SHA files gracefully"
+	@echo "Press Ctrl+C to stop"
+	@$(BUILD_DIR)/$(BINARY_NAME) -first-run
+
 # Run without building (assumes binary exists)
 run-only: ## Run the application without rebuilding
 	@echo "Starting $(BINARY_NAME)..."
@@ -68,12 +81,28 @@ run-only: ## Run the application without rebuilding
 	@echo "Press Ctrl+C to stop"
 	@$(BUILD_DIR)/$(BINARY_NAME)
 
+# Run without building in first-run mode
+run-only-first: ## Run the application without rebuilding in first-run mode
+	@echo "Starting $(BINARY_NAME) in first-run mode..."
+	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
+	@echo "First-run mode enabled - will handle missing SHA files gracefully"
+	@echo "Press Ctrl+C to stop"
+	@$(BUILD_DIR)/$(BINARY_NAME) -first-run
+
 # Run with Go directly (for development)
 dev: deps ## Run the application directly with Go (for development)
 	@echo "Starting $(BINARY_NAME) in development mode..."
 	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
 	@echo "Press Ctrl+C to stop"
 	go run $(MAIN_PATH)
+
+# Run with Go directly in first-run mode (for development)
+dev-first: deps ## Run the application directly with Go in first-run mode (for development)
+	@echo "Starting $(BINARY_NAME) in development mode with first-run flag..."
+	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
+	@echo "First-run mode enabled - will handle missing SHA files gracefully"
+	@echo "Press Ctrl+C to stop"
+	go run $(MAIN_PATH) -first-run
 
 # Clean build artifacts
 clean: ## Clean build artifacts
@@ -263,6 +292,7 @@ setup: ## Quick setup for new users
 	@echo "2. Option 1: Download Bedrock server executable to ./bedrock_server"
 	@echo "2. Option 2: Place Bedrock server archive in versions/bedrock-server.zip and run 'make bedrock-split bedrock-recombine bedrock-extract'"
 	@echo "3. Run 'make run' to start the application"
+	@echo "   - For first run (no SHA files): use 'make run-first'"
 
 # All-in-one development command
 dev-setup: deps fmt lint test build ## Complete development setup

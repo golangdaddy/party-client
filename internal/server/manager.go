@@ -398,6 +398,27 @@ func (m *Manager) pollConfiguration(githubClient *github.Client) {
 		return
 	}
 
+	// Handle first run scenario
+	if m.config.Server.FirstRun && m.lastCommitSHA == "" {
+		m.logger.Info("First run detected, setting initial commit SHA")
+		m.lastCommitSHA = commitSHA
+
+		// Get initial configuration
+		repoConfig, err := githubClient.GetConfig()
+		if err != nil {
+			m.logger.Errorf("Failed to get initial configuration from GitHub: %v", err)
+			return
+		}
+
+		m.mu.Lock()
+		defer m.mu.Unlock()
+
+		// Update servers based on initial configuration
+		m.updateServers(repoConfig)
+		m.lastConfig = repoConfig
+		return
+	}
+
 	// If no changes, skip
 	if commitSHA == m.lastCommitSHA {
 		return

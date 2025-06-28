@@ -169,6 +169,147 @@ The application will log which branch it's using:
 time="2024-01-01T12:00:00Z" level=info msg="Using branch 'production' for configuration"
 ```
 
+## First Run Mode
+
+When running the application for the first time, you may encounter issues with missing SHA files or initial configuration loading. The application provides a first-run mode to handle these scenarios gracefully.
+
+### Using First Run Mode
+
+Run the application with the `-first-run` flag:
+
+```bash
+./minecraft-manager -first-run
+```
+
+Or using the Makefile:
+```bash
+make run-first
+```
+
+### What First Run Mode Does
+
+- **Handles Missing SHA Files**: On the first run, the application may not have any previous commit SHA to compare against
+- **Initial Configuration Load**: Ensures the initial configuration is loaded properly without triggering unnecessary updates
+- **Graceful Startup**: Prevents errors that might occur when the application starts for the first time
+
+### When to Use First Run Mode
+
+Use first-run mode when:
+- Running the application for the first time
+- After clearing all application state
+- When switching to a new repository
+- When encountering SHA-related errors on startup
+
+### Normal Operation
+
+After the first successful run, you can switch to normal mode:
+```bash
+./minecraft-manager
+```
+
+The application will remember the last commit SHA and only update when actual changes are detected.
+
+## Makefile Usage
+
+The project includes a comprehensive Makefile with various targets for building, running, and managing the application.
+
+### Basic Commands
+
+```bash
+# Build the application
+make build
+
+# Run the application
+make run
+
+# Run in first-run mode
+make run-first
+
+# Run without rebuilding (if binary exists)
+make run-only
+
+# Run without rebuilding in first-run mode
+make run-only-first
+```
+
+### Development Commands
+
+```bash
+# Run directly with Go (for development)
+make dev
+
+# Run directly with Go in first-run mode
+make dev-first
+
+# Install dependencies
+make deps
+
+# Run tests
+make test
+
+# Format code
+make fmt
+
+# Run linter
+make lint
+```
+
+### Branch Management
+
+```bash
+# Switch to different branches
+make branch-main
+make branch-dev
+make branch-staging
+make branch-production
+
+# Show current branch
+make current-branch
+```
+
+### Bedrock Server Management
+
+```bash
+# Complete Bedrock server setup
+make bedrock-setup
+
+# Individual Bedrock commands
+make bedrock-split
+make bedrock-recombine
+make bedrock-extract
+make bedrock-clean
+make bedrock-status
+```
+
+### Docker Commands
+
+```bash
+# Build and run with Docker
+make docker-build
+make docker-run
+make docker-stop
+make docker-clean
+```
+
+### Utility Commands
+
+```bash
+# Show help
+make help
+
+# Show application status
+make status
+
+# Check configuration
+make config-check
+
+# Create example configuration
+make config-example
+
+# Quick setup for new users
+make setup
+```
+
 ## Configuration Options
 
 ### GitHub Configuration

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -18,6 +19,10 @@ import (
 )
 
 func main() {
+	// Parse command line flags
+	firstRun := flag.Bool("first-run", false, "Enable first run mode (ignores missing SHA files)")
+	flag.Parse()
+
 	// Initialize logger
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{
@@ -28,6 +33,12 @@ func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		logger.Fatalf("Failed to load configuration: %v", err)
+	}
+
+	// Set first run flag from command line
+	cfg.Server.FirstRun = *firstRun
+	if *firstRun {
+		logger.Info("First run mode enabled - will handle missing SHA files gracefully")
 	}
 
 	// Log which branch is being used
