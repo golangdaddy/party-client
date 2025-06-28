@@ -459,40 +459,25 @@ func (m *Manager) pollConfiguration(githubClient *github.Client) {
 }
 
 func (m *Manager) updateServers(repoConfig *config.RepoConfig) {
-	// Stop servers that are no longer in configuration
+	// Stop all existing servers first
 	for name := range m.servers {
-		found := false
-		for _, serverConfig := range repoConfig.Servers {
-			if serverConfig.Name == name {
-				found = true
-				break
-			}
-		}
-		if !found {
-			m.logger.Infof("Stopping server %s (no longer in configuration)", name)
-			m.stopServer(name)
-		}
+		m.logger.Infof("Stopping server %s", name)
+		m.stopServer(name)
 	}
 
-	// Start/update servers from configuration
-	for _, serverConfig := range repoConfig.Servers {
-		if len(m.servers) >= m.config.Server.MaxInstances {
-			m.logger.Warnf("Maximum number of servers reached (%d), skipping %s", m.config.Server.MaxInstances, serverConfig.Name)
-			continue
-		}
+	// Only start the first server in the configuration to avoid IPv6 port conflicts
+	// Bedrock server always binds to IPv6 port 19133, which prevents multiple servers
+	if len(repoConfig.Servers) > 0 {
+		serverConfig := repoConfig.Servers[0]
+		m.logger.Infof("Starting server %s (single-server mode due to IPv6 port limitations)", serverConfig.Name)
+		m.startServer(&serverConfig)
 
-		existingServer, exists := m.servers[serverConfig.Name]
-		if exists {
-			// Update existing server if configuration changed
-			if m.serverConfigChanged(existingServer.Config, &serverConfig) {
-				m.logger.Infof("Restarting server %s (configuration changed)", serverConfig.Name)
-				m.stopServer(serverConfig.Name)
-				m.startServer(&serverConfig)
+		// Log that other servers are skipped
+		if len(repoConfig.Servers) > 1 {
+			m.logger.Infof("Skipping %d additional servers due to Bedrock server IPv6 port limitations", len(repoConfig.Servers)-1)
+			for i := 1; i < len(repoConfig.Servers); i++ {
+				m.logger.Infof("  - Skipped: %s", repoConfig.Servers[i].Name)
 			}
-		} else {
-			// Start new server
-			m.logger.Infof("Starting new server %s", serverConfig.Name)
-			m.startServer(&serverConfig)
 		}
 	}
 }
@@ -511,20 +496,9 @@ func (m *Manager) startServer(serverConfig *config.MinecraftServerConfig) {
 		return
 	}
 
-	// Only kill processes using the specific ports this server needs
-	// This is more selective than killing all Bedrock servers
-	actualPort := 20000 + serverConfig.Port - 19132 // The actual port the server will use
-
-	// Kill any existing processes using this specific port
-	if err := m.killProcessesOnPort(actualPort); err != nil {
-		m.logger.Warnf("Failed to kill processes on port %d: %v", actualPort, err)
-	}
-
-	// Also kill processes on the default IPv6 port to prevent conflicts
-	// But only if this server would conflict with it
-	if err := m.killProcessesOnPort(19133); err != nil {
-		m.logger.Warnf("Failed to kill processes on IPv6 port 19133: %v", err)
-	}
+	// Since we're only running one server at a time, we can safely kill any existing Bedrock processes
+	// This ensures a clean start without port conflicts
+	m.killAllBedrockServers()
 
 	// Wait a bit to ensure ports are fully released
 	time.Sleep(3 * time.Second)
@@ -595,9 +569,6 @@ func (m *Manager) startServer(serverConfig *config.MinecraftServerConfig) {
 	go m.monitorServer(serverConfig.Name, cmd)
 
 	m.logger.Infof("Server %s started on port %d", serverConfig.Name, serverConfig.Port)
-
-	// Add a longer delay between server starts to prevent port conflicts
-	time.Sleep(5 * time.Second)
 }
 
 func (m *Manager) stopServer(name string) {
