@@ -104,7 +104,7 @@ bedrock-split: ## Split Bedrock archive into 10 layers
 
 bedrock-recombine: ## Recombine layers into archive
 	@echo "Recombining Bedrock server layers..."
-	@if [ ! -f $(VERSIONS_DIR)/bedrock-server.layer.00 ]; then \
+	@if [ ! -f $(VERSIONS_DIR)/bedrock-server.layer.0 ]; then \
 		echo "Error: No layer files found in $(VERSIONS_DIR)/"; \
 		echo "Run 'make bedrock-split' first"; \
 		exit 1; \
@@ -244,7 +244,7 @@ start: ## Complete setup and start the client
 	@echo "2. Checking Bedrock server..."
 	@if [ ! -f $(BEDROCK_EXECUTABLE) ]; then \
 		echo "   Bedrock server not found, checking for layer files..."; \
-		if [ -f $(VERSIONS_DIR)/bedrock-server.layer.00 ]; then \
+		if [ -f $(VERSIONS_DIR)/bedrock-server.layer.0 ]; then \
 			echo "   Layer files found, recombining and extracting..."; \
 			$(MAKE) bedrock-recombine bedrock-extract; \
 		elif [ -f $(BEDROCK_ARCHIVE) ]; then \
