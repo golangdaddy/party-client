@@ -96,15 +96,15 @@ bedrock-split: ## Split Bedrock archive into 10 layers
 	fi
 	@mkdir -p $(VERSIONS_DIR)
 	@echo "Archive size: $(shell stat -c%s $(BEDROCK_ARCHIVE)) bytes"
-	@echo "Layer size: $(shell echo $$(($(shell stat -c%s $(BEDROCK_ARCHIVE)) / 10)) bytes"
+	@echo "Layer size: $(shell echo $$(( $$(stat -c%s $(BEDROCK_ARCHIVE)) / 10 )) ) bytes"
 	@echo "Splitting into 10 layers..."
-	@split -b $$(($(shell stat -c%s $(BEDROCK_ARCHIVE)) / 10)) $(BEDROCK_ARCHIVE) $(VERSIONS_DIR)/bedrock-server.layer.
+	@split -d -b $$(($(shell stat -c%s $(BEDROCK_ARCHIVE)) / 10)) $(BEDROCK_ARCHIVE) $(VERSIONS_DIR)/bedrock-server.layer.
 	@echo "Layers created:"
 	@ls -la $(VERSIONS_DIR)/bedrock-server.layer.*
 
 bedrock-recombine: ## Recombine layers into archive
 	@echo "Recombining Bedrock server layers..."
-	@if [ ! -f $(VERSIONS_DIR)/bedrock-server.layer.0 ]; then \
+	@if [ ! -f $(VERSIONS_DIR)/bedrock-server.layer.00 ]; then \
 		echo "Error: No layer files found in $(VERSIONS_DIR)/"; \
 		echo "Run 'make bedrock-split' first"; \
 		exit 1; \
