@@ -126,15 +126,20 @@ bedrock-extract: ## Extract recombined archive
 	@if unzip -o $(VERSIONS_DIR)/bedrock-server-recombined.zip -d $(BEDROCK_EXTRACTED) 2>/dev/null; then \
 		echo "Extracted with unzip"; \
 	else \
-		echo "zip extraction failed, trying tar.gz..."; \
-		if tar -xzf $(VERSIONS_DIR)/bedrock-server-recombined.zip -C $(BEDROCK_EXTRACTED) 2>/dev/null; then \
-			echo "Extracted with tar.gz"; \
+		echo "zip extraction failed, trying with force flag..."; \
+		if unzip -o -q $(VERSIONS_DIR)/bedrock-server-recombined.zip -d $(BEDROCK_EXTRACTED) 2>/dev/null; then \
+			echo "Extracted with unzip (force)"; \
 		else \
-			echo "Failed to extract archive. Trying to find bedrock_server executable..."; \
-			if find $(BEDROCK_EXTRACTED) -name "bedrock_server" -type f 2>/dev/null; then \
-				echo "Found bedrock_server executable"; \
+			echo "zip extraction failed, trying tar.gz..."; \
+			if tar -xzf $(VERSIONS_DIR)/bedrock-server-recombined.zip -C $(BEDROCK_EXTRACTED) 2>/dev/null; then \
+				echo "Extracted with tar.gz"; \
 			else \
-				echo "No bedrock_server executable found in extracted files"; \
+				echo "Failed to extract archive. Trying to find bedrock_server executable..."; \
+				if find $(BEDROCK_EXTRACTED) -name "bedrock_server" -type f 2>/dev/null; then \
+					echo "Found bedrock_server executable"; \
+				else \
+					echo "No bedrock_server executable found in extracted files"; \
+				fi; \
 			fi; \
 		fi; \
 	fi
@@ -248,6 +253,9 @@ start: ## Complete setup and start the client
 				echo "   Layer files found, skipping split and recombine..."; \
 				$(MAKE) bedrock-recombine bedrock-extract; \
 			fi; \
+		elif [ -f $(VERSIONS_DIR)/bedrock-server.layer.00 ]; then \
+			echo "   Layer files found, recombining and extracting..."; \
+			$(MAKE) bedrock-recombine bedrock-extract; \
 		else \
 			echo "   No Bedrock server archive found at $(BEDROCK_ARCHIVE)"; \
 			echo "   Please place your Bedrock server archive in $(BEDROCK_ARCHIVE)"; \
