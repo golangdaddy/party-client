@@ -12,7 +12,7 @@ BEDROCK_ARCHIVE = $(VERSIONS_DIR)/bedrock-server.zip
 # Default target
 .DEFAULT_GOAL := help
 
-.PHONY: help clean docker-build docker-run docker-stop docker-clean branch-main branch-dev branch-staging branch-production bedrock-split bedrock-recombine bedrock-extract bedrock-clean bedrock-status config-check config-example status current-branch bedrock-setup
+.PHONY: help clean docker-build docker-run docker-stop docker-clean branch-main branch-dev branch-staging branch-production bedrock-split bedrock-recombine bedrock-extract bedrock-clean bedrock-status config-check config-example status current-branch bedrock-setup start
 
 # Help target
 help: ## Show this help message
@@ -21,7 +21,10 @@ help: ## Show this help message
 	@echo ""
 	@echo "Available commands:"
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo "Main Commands:"
+	@echo "  \033[36mstart\033[0m              Complete setup and start the client"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}' | grep -v "start"
 	@echo ""
 	@echo "Branch Management:"
 	@echo "  \033[36mbranch-main\033[0m        Switch to main branch"
@@ -198,4 +201,48 @@ current-branch: ## Show current branch configuration
 # Complete Bedrock setup
 bedrock-setup: bedrock-split bedrock-recombine bedrock-extract ## Complete Bedrock server setup
 	@echo "Bedrock server setup completed!"
-	@echo "Executable ready: bedrock-server-extracted/bedrock_server" 
+	@echo "Executable ready: bedrock-server-extracted/bedrock_server"
+
+# Complete client setup and run
+start: ## Complete setup and start the client
+	@echo "Starting Minecraft Bedrock Server Manager..."
+	@echo "=========================================="
+	@echo ""
+	@echo "1. Checking configuration..."
+	@if [ ! -f $(CONFIG_FILE) ]; then \
+		echo "   Creating example configuration..."; \
+		$(MAKE) config-example; \
+		echo "   Please edit $(CONFIG_FILE) with your settings before running again"; \
+		exit 1; \
+	fi
+	@echo "   Configuration file found: $(CONFIG_FILE)"
+	@echo ""
+	@echo "2. Checking Bedrock server..."
+	@if [ ! -f bedrock-server-extracted/bedrock_server ]; then \
+		echo "   Bedrock server not found, checking for archive..."; \
+		if [ -f $(BEDROCK_ARCHIVE) ]; then \
+			echo "   Archive found, setting up Bedrock server..."; \
+			$(MAKE) bedrock-setup; \
+		else \
+			echo "   No Bedrock server archive found at $(BEDROCK_ARCHIVE)"; \
+			echo "   Please place your Bedrock server archive in $(BEDROCK_ARCHIVE)"; \
+			echo "   Or download bedrock_server executable to ./bedrock_server"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "   Bedrock server executable found: bedrock-server-extracted/bedrock_server"; \
+	fi
+	@echo ""
+	@echo "3. Checking client binary..."
+	@if [ ! -f $(BUILD_DIR)/$(BINARY_NAME) ]; then \
+		echo "   Client binary not found at $(BUILD_DIR)/$(BINARY_NAME)"; \
+		echo "   Please build the client first using 'go build -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_PATH)'"; \
+		exit 1; \
+	fi
+	@echo "   Client binary found: $(BUILD_DIR)/$(BINARY_NAME)"
+	@echo ""
+	@echo "4. Starting client..."
+	@echo "   Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
+	@echo "   Press Ctrl+C to stop"
+	@echo ""
+	@$(BUILD_DIR)/$(BINARY_NAME) 
