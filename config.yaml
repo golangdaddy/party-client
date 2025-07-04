@@ -11,5 +11,5 @@ http:
 server:
   base_dir: "./servers"
   max_instances: 5
-  bedrock_path: "./bedrock_server"  # Path to Bedrock server executable
+  bedrock_path: "./versions/bedrock-server-extracted/bedrock_server"  # Path to Bedrock server executable
   memory_limit: "1G" 

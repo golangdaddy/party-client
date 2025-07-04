@@ -1,0 +1,17 @@
+Dedicated_Server.txt
+[2025-07-04 21:51:01:691 INFO] Starting Server
+[2025-07-04 21:51:01:691 INFO] Version: 1.21.92.1
+[2025-07-04 21:51:01:691 INFO] Session ID: d8b1c5fc-2c24-4c2d-a09d-6e0f8aab0278
+[2025-07-04 21:51:01:691 INFO] Build ID: 34417687
+[2025-07-04 21:51:01:691 INFO] Branch: r/21_u9
+[2025-07-04 21:51:01:691 INFO] Commit ID: 7473620acd458b6dc1885615e752aad5c2877b76
+[2025-07-04 21:51:01:691 INFO] Configuration: Publish
+[2025-07-04 21:51:01:691 INFO] Level Name: survival
+[2025-07-04 21:51:01:692 ERROR] Error opening allow list file: allowlist.json
+[2025-07-04 21:51:01:692 INFO] No CDN config file found for dedicated server
+[2025-07-04 21:51:01:692 INFO] Game mode: 0 Survival
+[2025-07-04 21:51:01:692 INFO] Difficulty: 2 NORMAL
+[2025-07-04 21:51:01:693 INFO] Content logging to console is enabled.
+[2025-07-04 21:51:01:693 INFO] AuthHelper loading cert AppCertificate.pfx
+[2025-07-04 21:51:01:693 WARN] AuthHelper could not find cert
+[2025-07-04 21:51:01:694 ERROR] Failed to load Vanilla Resource Pack, is the vanilla pack missing from the loaded world?

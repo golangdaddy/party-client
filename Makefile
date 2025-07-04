@@ -8,6 +8,8 @@ CONFIG_FILE = config.yaml
 BRANCH_FILE = branch
 VERSIONS_DIR = versions
 BEDROCK_ARCHIVE = $(VERSIONS_DIR)/bedrock-server.zip
+BEDROCK_EXTRACTED = $(VERSIONS_DIR)/bedrock-server-extracted
+BEDROCK_EXECUTABLE = $(BEDROCK_EXTRACTED)/bedrock_server
 
 # Default target
 .DEFAULT_GOAL := help
@@ -118,26 +120,26 @@ bedrock-extract: ## Extract recombined archive
 		echo "Run 'make bedrock-recombine' first"; \
 		exit 1; \
 	fi
-	@rm -rf bedrock-server-extracted
-	@mkdir -p bedrock-server-extracted
+	@rm -rf $(BEDROCK_EXTRACTED)
+	@mkdir -p $(BEDROCK_EXTRACTED)
 	@echo "Extracting zip archive..."
-	@if unzip -o $(VERSIONS_DIR)/bedrock-server-recombined.zip -d bedrock-server-extracted 2>/dev/null; then \
+	@if unzip -o $(VERSIONS_DIR)/bedrock-server-recombined.zip -d $(BEDROCK_EXTRACTED) 2>/dev/null; then \
 		echo "Extracted with unzip"; \
 	else \
 		echo "zip extraction failed, trying tar.gz..."; \
-		if tar -xzf $(VERSIONS_DIR)/bedrock-server-recombined.zip -C bedrock-server-extracted 2>/dev/null; then \
+		if tar -xzf $(VERSIONS_DIR)/bedrock-server-recombined.zip -C $(BEDROCK_EXTRACTED) 2>/dev/null; then \
 			echo "Extracted with tar.gz"; \
 		else \
 			echo "Failed to extract archive. Trying to find bedrock_server executable..."; \
-			if find bedrock-server-extracted -name "bedrock_server" -type f 2>/dev/null; then \
+			if find $(BEDROCK_EXTRACTED) -name "bedrock_server" -type f 2>/dev/null; then \
 				echo "Found bedrock_server executable"; \
 			else \
 				echo "No bedrock_server executable found in extracted files"; \
 			fi; \
 		fi; \
 	fi
-	@if [ -f bedrock-server-extracted/bedrock_server ]; then \
-		chmod +x bedrock-server-extracted/bedrock_server; \
+	@if [ -f $(BEDROCK_EXECUTABLE) ]; then \
+		chmod +x $(BEDROCK_EXECUTABLE); \
 		echo "Made bedrock_server executable"; \
 	fi
 
@@ -145,7 +147,7 @@ bedrock-clean: ## Clean Bedrock files and layers
 	@echo "Cleaning Bedrock server files..."
 	@rm -f $(VERSIONS_DIR)/bedrock-server.layer.* 2>/dev/null || true
 	@rm -f $(VERSIONS_DIR)/bedrock-server-recombined.zip 2>/dev/null || true
-	@rm -rf bedrock-server-extracted 2>/dev/null || true
+	@rm -rf $(BEDROCK_EXTRACTED) 2>/dev/null || true
 	@echo "Bedrock files cleaned"
 
 bedrock-status: ## Show Bedrock server status
@@ -154,11 +156,9 @@ bedrock-status: ## Show Bedrock server status
 	@echo "Original archive: $(shell [ -f $(BEDROCK_ARCHIVE) ] && echo "Yes ($(shell stat -c%s $(BEDROCK_ARCHIVE)) bytes)" || echo "No")"
 	@echo "Layer files: $(shell ls $(VERSIONS_DIR)/bedrock-server.layer.* 2>/dev/null | wc -l | tr -d ' ') / 10"
 	@echo "Recombined archive: $(shell [ -f $(VERSIONS_DIR)/bedrock-server-recombined.zip ] && echo "Yes ($(shell stat -c%s $(VERSIONS_DIR)/bedrock-server-recombined.zip) bytes)" || echo "No")"
-	@echo "Extracted directory: $(shell [ -d bedrock-server-extracted ] && echo "Yes" || echo "No")"
-	@if [ -f bedrock-server-extracted/bedrock_server ]; then \
-		echo "Executable: Yes (bedrock-server-extracted/bedrock_server)"; \
-	elif [ -f ./bedrock_server ]; then \
-		echo "Executable: Yes (./bedrock_server)"; \
+	@echo "Extracted directory: $(shell [ -d $(BEDROCK_EXTRACTED) ] && echo "Yes" || echo "No")"
+	@if [ -f $(BEDROCK_EXECUTABLE) ]; then \
+		echo "Executable: Yes ($(BEDROCK_EXECUTABLE))"; \
 	else \
 		echo "Executable: No"; \
 	fi
@@ -213,14 +213,14 @@ bedrock-download: ## Download Bedrock server executable
 	@echo ""
 	@echo "After downloading, place the file as:"
 	@echo "  - $(BEDROCK_ARCHIVE) (for archive processing)"
-	@echo "  - ./bedrock_server (for direct use)"
+	@echo "  - $(BEDROCK_EXECUTABLE) (for direct use)"
 	@echo ""
 	@echo "Or run 'make bedrock-setup' if you have the archive file."
 
 # Complete Bedrock setup
 bedrock-setup: bedrock-split bedrock-recombine bedrock-extract ## Complete Bedrock server setup
 	@echo "Bedrock server setup completed!"
-	@echo "Executable ready: bedrock-server-extracted/bedrock_server"
+	@echo "Executable ready: $(BEDROCK_EXECUTABLE)"
 
 # Complete client setup and run
 start: ## Complete setup and start the client
@@ -237,7 +237,7 @@ start: ## Complete setup and start the client
 	@echo "   Configuration file found: $(CONFIG_FILE)"
 	@echo ""
 	@echo "2. Checking Bedrock server..."
-	@if [ ! -f bedrock-server-extracted/bedrock_server ] && [ ! -f ./bedrock_server ]; then \
+	@if [ ! -f $(BEDROCK_EXECUTABLE) ]; then \
 		echo "   Bedrock server not found, checking for archive..."; \
 		if [ -f $(BEDROCK_ARCHIVE) ]; then \
 			echo "   Archive found, setting up Bedrock server..."; \
@@ -245,15 +245,11 @@ start: ## Complete setup and start the client
 		else \
 			echo "   No Bedrock server archive found at $(BEDROCK_ARCHIVE)"; \
 			echo "   Please place your Bedrock server archive in $(BEDROCK_ARCHIVE)"; \
-			echo "   Or download bedrock_server executable to ./bedrock_server"; \
+			echo "   Or download bedrock_server executable to $(BEDROCK_EXECUTABLE)"; \
 			exit 1; \
 		fi; \
 	else \
-		if [ -f bedrock-server-extracted/bedrock_server ]; then \
-			echo "   Bedrock server executable found: bedrock-server-extracted/bedrock_server"; \
-		else \
-			echo "   Bedrock server executable found: ./bedrock_server"; \
-		fi; \
+		echo "   Bedrock server executable found: $(BEDROCK_EXECUTABLE)"; \
 	fi
 	@echo ""
 	@echo "3. Checking client binary..."
