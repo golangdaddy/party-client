@@ -240,8 +240,14 @@ start: ## Complete setup and start the client
 	@if [ ! -f $(BEDROCK_EXECUTABLE) ]; then \
 		echo "   Bedrock server not found, checking for archive..."; \
 		if [ -f $(BEDROCK_ARCHIVE) ]; then \
-			echo "   Archive found, setting up Bedrock server..."; \
-			$(MAKE) bedrock-setup; \
+			echo "   Archive found, checking if layers exist..."; \
+			if [ ! -f $(VERSIONS_DIR)/bedrock-server.layer.00 ]; then \
+				echo "   Layer files not found, running full setup..."; \
+				$(MAKE) bedrock-setup; \
+			else \
+				echo "   Layer files found, skipping split and recombine..."; \
+				$(MAKE) bedrock-recombine bedrock-extract; \
+			fi; \
 		else \
 			echo "   No Bedrock server archive found at $(BEDROCK_ARCHIVE)"; \
 			echo "   Please place your Bedrock server archive in $(BEDROCK_ARCHIVE)"; \
