@@ -9,13 +9,10 @@ BRANCH_FILE = branch
 VERSIONS_DIR = versions
 BEDROCK_ARCHIVE = $(VERSIONS_DIR)/bedrock-server.zip
 
-# Go build flags
-LDFLAGS = -ldflags "-X main.Version=$(shell git describe --tags --always --dirty 2>/dev/null || echo 'dev')"
-
 # Default target
 .DEFAULT_GOAL := help
 
-.PHONY: help build run clean test deps install docker-build docker-run docker-clean branch-main branch-dev branch-staging branch-production bedrock-split bedrock-recombine bedrock-extract bedrock-clean bedrock-status
+.PHONY: help clean docker-build docker-run docker-stop docker-clean branch-main branch-dev branch-staging branch-production bedrock-split bedrock-recombine bedrock-extract bedrock-clean bedrock-status config-check config-example status current-branch bedrock-setup
 
 # Help target
 help: ## Show this help message
@@ -25,11 +22,6 @@ help: ## Show this help message
 	@echo "Available commands:"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
-	@echo ""
-	@echo "First Run Mode:"
-	@echo "  \033[36mrun-first\033[0m         Build and run in first-run mode"
-	@echo "  \033[36mrun-only-first\033[0m    Run without building in first-run mode"
-	@echo "  \033[36mdev-first\033[0m         Run with Go directly in first-run mode"
 	@echo ""
 	@echo "Branch Management:"
 	@echo "  \033[36mbranch-main\033[0m        Switch to main branch"
@@ -45,82 +37,11 @@ help: ## Show this help message
 	@echo "  \033[36mbedrock-status\033[0m     Show Bedrock server status"
 	@echo ""
 
-# Dependencies
-deps: ## Download and tidy Go dependencies
-	@echo "Installing dependencies..."
-	go mod download
-	go mod tidy
-	@echo "Dependencies installed successfully!"
-
-# Build the application
-build: deps ## Build the application
-	@echo "Building $(BINARY_NAME)..."
-	@mkdir -p $(BUILD_DIR)
-	go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_PATH)
-	@echo "Build completed: $(BUILD_DIR)/$(BINARY_NAME)"
-
-# Run the application
-run: build ## Build and run the application
-	@echo "Starting $(BINARY_NAME)..."
-	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
-	@echo "Press Ctrl+C to stop"
-	@$(BUILD_DIR)/$(BINARY_NAME)
-
-# Run in first-run mode
-run-first: build ## Build and run the application in first-run mode
-	@echo "Starting $(BINARY_NAME) in first-run mode..."
-	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
-	@echo "First-run mode enabled - will handle missing SHA files gracefully"
-	@echo "Press Ctrl+C to stop"
-	@$(BUILD_DIR)/$(BINARY_NAME) -first-run
-
-# Run without building (assumes binary exists)
-run-only: ## Run the application without rebuilding
-	@echo "Starting $(BINARY_NAME)..."
-	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
-	@echo "Press Ctrl+C to stop"
-	@$(BUILD_DIR)/$(BINARY_NAME)
-
-# Run without building in first-run mode
-run-only-first: ## Run the application without rebuilding in first-run mode
-	@echo "Starting $(BINARY_NAME) in first-run mode..."
-	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
-	@echo "First-run mode enabled - will handle missing SHA files gracefully"
-	@echo "Press Ctrl+C to stop"
-	@$(BUILD_DIR)/$(BINARY_NAME) -first-run
-
-# Run with Go directly (for development)
-dev: deps ## Run the application directly with Go (for development)
-	@echo "Starting $(BINARY_NAME) in development mode..."
-	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
-	@echo "Press Ctrl+C to stop"
-	go run $(MAIN_PATH)
-
-# Run with Go directly in first-run mode (for development)
-dev-first: deps ## Run the application directly with Go in first-run mode (for development)
-	@echo "Starting $(BINARY_NAME) in development mode with first-run flag..."
-	@echo "Current branch: $(shell cat $(BRANCH_FILE) 2>/dev/null || echo 'main (default)')"
-	@echo "First-run mode enabled - will handle missing SHA files gracefully"
-	@echo "Press Ctrl+C to stop"
-	go run $(MAIN_PATH) -first-run
-
 # Clean build artifacts
 clean: ## Clean build artifacts
 	@echo "Cleaning build artifacts..."
 	rm -rf $(BUILD_DIR)
 	@echo "Clean completed!"
-
-# Test the application
-test: deps ## Run tests
-	@echo "Running tests..."
-	go test -v ./...
-	@echo "Tests completed!"
-
-# Install the application
-install: build ## Install the application to /usr/local/bin
-	@echo "Installing $(BINARY_NAME) to /usr/local/bin..."
-	sudo cp $(BUILD_DIR)/$(BINARY_NAME) /usr/local/bin/
-	@echo "Installation completed!"
 
 # Docker commands
 docker-build: ## Build Docker image
@@ -177,7 +98,7 @@ bedrock-split: ## Split Bedrock archive into 10 layers
 
 bedrock-recombine: ## Recombine layers into archive
 	@echo "Recombining Bedrock server layers..."
-	@if [ ! -f $(VERSIONS_DIR)/bedrock-server.layer.aa ]; then \
+	@if [ ! -f $(VERSIONS_DIR)/bedrock-server.layer.0 ]; then \
 		echo "Error: No layer files found in $(VERSIONS_DIR)/"; \
 		echo "Run 'make bedrock-split' first"; \
 		exit 1; \
@@ -264,44 +185,6 @@ status: ## Show application status
 	@echo "Docker image: $(shell docker images minecraft-bedrock-manager 2>/dev/null | grep -q minecraft-bedrock-manager && echo "Yes" || echo "No")"
 	@echo ""
 	@$(MAKE) bedrock-status
-
-# Development commands
-fmt: ## Format Go code
-	@echo "Formatting Go code..."
-	go fmt ./...
-	@echo "Code formatting completed!"
-
-lint: ## Run linter
-	@echo "Running linter..."
-	golangci-lint run ./...
-	@echo "Linting completed!"
-
-# Quick setup for new users
-setup: ## Quick setup for new users
-	@echo "Setting up Minecraft Bedrock Server Manager..."
-	@echo "1. Installing dependencies..."
-	$(MAKE) deps
-	@echo "2. Building application..."
-	$(MAKE) build
-	@echo "3. Creating example configuration..."
-	$(MAKE) config-example
-	@echo ""
-	@echo "Setup completed!"
-	@echo "Next steps:"
-	@echo "1. Edit config.yaml with your GitHub repository settings"
-	@echo "2. Option 1: Download Bedrock server executable to ./bedrock_server"
-	@echo "2. Option 2: Place Bedrock server archive in versions/bedrock-server.zip and run 'make bedrock-split bedrock-recombine bedrock-extract'"
-	@echo "3. Run 'make run' to start the application"
-	@echo "   - For first run (no SHA files): use 'make run-first'"
-
-# All-in-one development command
-dev-setup: deps fmt lint test build ## Complete development setup
-	@echo "Development setup completed!"
-
-# Release commands
-release: clean build test ## Prepare for release
-	@echo "Release preparation completed!"
-	@echo "Binary ready: $(BUILD_DIR)/$(BINARY_NAME)"
 
 # Show current branch
 current-branch: ## Show current branch configuration
