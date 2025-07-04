@@ -1,8 +1,8 @@
 # Minecraft Bedrock Server Manager Makefile 2025
 
 # Variables
-BINARY_NAME = minecraft-manager
-BUILD_DIR = build
+BINARY_NAME = client
+BUILD_DIR = cmd/client
 MAIN_PATH = cmd/client/main.go
 CONFIG_FILE = config.yaml
 BRANCH_FILE = branch
