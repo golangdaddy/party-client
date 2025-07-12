@@ -1,32 +1,4 @@
 servers:
-  - name: "survival-world"
-    port: 19132
-    version: "1.20.50"
-    world_name: "survival"
-    level_seed: "123456789"
-    level_type: "DEFAULT"
-    gamemode: "survival"
-    difficulty: "normal"
-    max_players: 20
-    online_mode: true
-    pvp: true
-    allow_flight: false
-    motd: "Welcome to Survival World!"
-    whitelist:
-      - "player1"
-      - "player2"
-    ops:
-      - "admin1"
-    default_player_permission_level: "member"
-    content_log_file_enabled: true
-    enable_scripts: false
-    enable_command_blocking: false
-    max_threads: 8
-    player_idle_timeout: 30
-    max_world_size: 10000
-    properties:
-      server-authoritative-movement: "server-auth"
-      player-movement-score-threshold: "20"
 
   - name: "creative-world"
     port: 19133
@@ -55,6 +27,35 @@ servers:
     properties:
       server-authoritative-movement: "client-auth"
       allow-cheats: "true"
+
+  - name: "survival-world"
+    port: 19132
+    version: "1.20.50"
+    world_name: "survival"
+    level_seed: "123456789"
+    level_type: "DEFAULT"
+    gamemode: "survival"
+    difficulty: "normal"
+    max_players: 20
+    online_mode: true
+    pvp: true
+    allow_flight: false
+    motd: "Welcome to Survival World!"
+    whitelist:
+      - "player1"
+      - "player2"
+    ops:
+      - "admin1"
+    default_player_permission_level: "member"
+    content_log_file_enabled: true
+    enable_scripts: false
+    enable_command_blocking: false
+    max_threads: 8
+    player_idle_timeout: 30
+    max_world_size: 10000
+    properties:
+      server-authoritative-movement: "server-auth"
+      player-movement-score-threshold: "20"
 
   - name: "pvp-arena"
     port: 19134
