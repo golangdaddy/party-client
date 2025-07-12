@@ -5,7 +5,7 @@ servers:
     version: "1.20.50"
     world_name: "creative"
     level_seed: "987654321"
-    level_type: "FLAT"
+    level_type: "DEFAULT"
     gamemode: "creative"
     difficulty: "peaceful"
     max_players: 10
